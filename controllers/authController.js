@@ -1,10 +1,16 @@
 import { User } from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password,role } = req.body;
+    const { name, email, password, role } = req.body;
+
+    // PASSWORD VALIDATION
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters",
+      });
+    }
 
     const userExist = await User.findOne({ email });
 
@@ -20,10 +26,13 @@ export const register = async (req, res, next) => {
       name,
       email,
       password: hashedPassword,
-      role
+      role,
     });
 
-    res.status(200).json({ message: "User Created Successfully", newUser });
+    res.status(200).json({
+      message: "User Created Successfully",
+      newUser,
+    });
   } catch (error) {
     next(error);
   }
@@ -63,7 +72,7 @@ export const login = async (req, res, next) => {
       user: {
         id: user._id,
         email: user.email,
-         role: user.role,
+        role: user.role,
       },
     });
   } catch (error) {

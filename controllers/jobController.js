@@ -1,4 +1,5 @@
 import { Job } from "../models/job.js";
+import { Application } from "../models/application.js";
 
 //Create Job Recruiter only
 export const createJob = async (req, res, next) => {
@@ -90,22 +91,33 @@ export const deleteJob = async (req, res, next) => {
     const job = await Job.findById(req.params.id);
 
     if (!job) {
-      return res.status(404).json({ message: "Job Not Found" });
+      return res.status(404).json({
+        message: "Job Not Found",
+      });
     }
 
-    // check ownership
+    // CHECK OWNERSHIP
     if (job.postedBy.toString() !== req.user.id) {
-      return res.status(401).json({ message: "Not Authorized" });
+      return res.status(401).json({
+        message: "Not Authorized",
+      });
     }
 
+    // DELETE RELATED APPLICATIONS
+    await Application.deleteMany({
+      job: req.params.id,
+    });
+
+    // DELETE JOB
     await job.deleteOne();
 
-    return res.status(200).json({ message: "Job Deleted Successfully" });
+    return res.status(200).json({
+      message: "Job Deleted Successfully",
+    });
   } catch (error) {
     next(error);
   }
 };
-
 //Get My Jobs
 export const getMyJobs = async (req, res, next) => {
   try {

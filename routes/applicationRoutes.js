@@ -2,6 +2,7 @@ import express from "express";
 import { protect } from "../middlewares/authMiddleware.js";
 import {
   applyJob,
+  deleteApplication,
   getApplicantsForJob,
   getMyApplication,
   UpdateApplicationStatus,
@@ -14,7 +15,7 @@ const router = express.Router();
 router.post("/applyjob/:jobId", protect, upload.single("resume"), applyJob);
 router.get("/myapplications", protect, getMyApplication);
 router.get(
-  "/applicantsforjob/:jobId",
+"/applicantsforjob/:jobId",
   protect,
   authorize("recruiter"),
   getApplicantsForJob,
@@ -25,5 +26,8 @@ router.put(
   authorize("recruiter"),
   UpdateApplicationStatus,
 );
+
+router.delete("/deleteapplicant/:applicationId", protect,
+  authorize("recruiter"),deleteApplication)
 
 export default router;

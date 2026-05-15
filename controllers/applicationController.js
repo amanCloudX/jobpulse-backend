@@ -15,6 +15,7 @@ export const applyJob = async (req, res, next) => {
       applicant: req.user.id,
     });
     if (existingApplicant) {
+      return;
       res.status(400).json({ message: "Already Applied" });
     }
 
@@ -41,7 +42,10 @@ export const getMyApplication = async (req, res, next) => {
       .populate("job")
       .sort({ createdAt: -1 });
 
-    res.status(200).json(applications);
+    // REMOVE DELETED JOB APPLICATIONS
+    const validApplications = applications.filter((app) => app.job !== null);
+
+    res.status(200).json(validApplications);
   } catch (error) {
     next(error);
   }
@@ -79,6 +83,28 @@ export const UpdateApplicationStatus = async (req, res, next) => {
     res.status(200).json({
       message: "Status Updated",
       application,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteApplication = async (req, res, next) => {
+  try {
+    const { applicationId } = req.params;
+
+    const application = await Application.findById(applicationId);
+
+    if (!application) {
+      return res.status(404).json({
+        message: "Application Not Found",
+      });
+    }
+
+    await application.deleteOne();
+
+    res.status(200).json({
+      message: "Application Deleted Successfully",
     });
   } catch (error) {
     next(error);
