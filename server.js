@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { connectDB } from "./config/db.js";
 import protectedRoute from "./routes/protectedRoute.js";
@@ -12,6 +13,9 @@ const app = express();
 connectDB();
 app.use(cors());
 app.use(express.json());
+
+//routes
+app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/protected", protectedRoute);
 app.use("/api/jobs", jobRoutes);
