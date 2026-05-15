@@ -93,11 +93,26 @@ export const deleteApplication = async (req, res, next) => {
   try {
     const { applicationId } = req.params;
 
-    const application = await Application.findById(applicationId);
+    const application =
+      await Application.findById(applicationId).populate("job");
 
     if (!application) {
       return res.status(404).json({
         message: "Application Not Found",
+      });
+    }
+
+    // CHECK JOB EXISTS
+    if (!application.job) {
+      return res.status(404).json({
+        message: "Job Not Found",
+      });
+    }
+
+    // CHECK RECRUITER OWNERSHIP
+    if (application.job.postedBy.toString() !== req.user.id) {
+      return res.status(401).json({
+        message: "Not Authorized",
       });
     }
 
